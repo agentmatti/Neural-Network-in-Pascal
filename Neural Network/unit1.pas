@@ -38,8 +38,8 @@ implementation
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
 Const
-  Layers     = 5; //amout of layers
-  maxNeurons = 4; //max amount of Neurons in a layer
+  Layers     = 2; //amout of layers
+  maxNeurons = 2; //max amount of Neurons in a layer
   delta      = 0.5; // the max amount the network changes
   decimals   = 5; //the amount of decimal-places
 
@@ -121,6 +121,11 @@ Function istGrade(Number:longword):Boolean;
 Begin
   if ((number Div 2)*2)= number then Result:=true
   else Result:= false;
+end;
+
+Function Rectifier(x:Real):Real;
+Begin
+  if x>0 then result:=x else result:=0;
 end;
 
 //################### still need other routines #####################
@@ -221,10 +226,10 @@ end;
 //-------------------------------------------------------------------
 
 Procedure start;
-Var
+Var i:Byte;
 begin
   WriteLn('---------------------------------------------------------');
-
+  Network:=InitializeNetwork(Network);
 
   WriteLn('---------------------------------------------------------');
 end;

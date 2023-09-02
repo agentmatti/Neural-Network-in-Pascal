@@ -38,8 +38,8 @@ implementation
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
 Const
-  Layers     = 5; //amout of layers
-  maxNeurons = 4; //max amount of Neurons in a layer
+  Layers     = 2; //amout of layers
+  maxNeurons = 2; //max amount of Neurons in a layer
   delta      = 0.5; // the max amount the network changes
   decimals   = 5; //the amount of decimal-places
 
@@ -121,6 +121,13 @@ Function istGrade(Number:longword):Boolean;
 Begin
   if ((number Div 2)*2)= number then Result:=true
   else Result:= false;
+end;
+
+Function Rectifier(x:Real):Real;
+Var y:Real;
+Begin
+  y:=0;
+  Result:=0;
 end;
 
 //################### still need other routines #####################
@@ -221,13 +228,10 @@ end;
 //-------------------------------------------------------------------
 
 Procedure start;
-Var
- testInputs : tLayerNeuonValues;
- i,rightNeuron, WrongNeuron : Byte;
- RandomNumber : longword;
+Var i:Byte;
 begin
   WriteLn('---------------------------------------------------------');
-
+  Network:=InitializeNetwork(Network);
 
   WriteLn('---------------------------------------------------------');
 end;
@@ -240,6 +244,7 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   start;
+  WriteLn(inttostr(2*(0>2)));
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
