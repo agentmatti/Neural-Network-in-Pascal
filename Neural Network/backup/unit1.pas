@@ -38,22 +38,16 @@ implementation
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
 Const
-  Layers     = 2; //amout of layers
-  maxNeurons = 2; //max amount of Neurons in a layer
-  delta      = 0.5; // the max amount the network changes
-  decimals   = 5; //the amount of decimal-places
 
 Type
-  tWheightList = Array [1..maxNeurons] of Real;
-
-  tLayerNeuonValues = Array [1..maxneurons] of real;
+  tWheightList = Array [1..1] of Real;
 
   tNeuron = Record
     Value   : Real;
-    Wheight : tWheightList;
+    Activation_Function : Byte;
   end;
 
-  tNeuralNetwork = Array [1..Layers,1..maxNeurons] of tNeuron;
+  tNeuralNetwork = 0;
 
 Var
   Network : tNeuralNetwork;
@@ -73,48 +67,13 @@ begin
 end;
 
 Function slightlyChanged(Net:tNeuralNetwork):tneuralNetwork;
-Var
-  i,j,k : Byte;
-  smallchange : Real;
-  prefix : shortint;
-  Longdelta : integer;
 Begin
-
-  For i:=1 to length(net) Do Begin
-    For j:=1 to length(net[1]) Do Begin
-      For k:=1 to length(net[1,1].Wheight) Do
-        Begin
-        longdelta := round(Delta*1000);
-        smallchange := (Random(longdelta)-(longdelta/2) )/ (1000);
-        //prefix := (Random(1)*2)-1;
-        net[i,j].Wheight[k] := net[i,j].Wheight[k] + smallchange; //* prefix;
-      end;
-
-    end;
-  end;
   Result:=net;
 end;
 
 Function setInputNeurons(net:tNeuralNetwork; inputs:tLayerNeuonValues): tNeuralNetwork;
-Var
-  i : Byte;
 Begin
-  for i:= 1 to length(net[1]) Do Begin
-    net[1,i].Value:=Inputs[i];
-  end;
   Result:=net;
-end;
-
-Function LowestOutputValue(Net:tNeuralNetwork):Real;
-Var
-  i : Byte;
-  lowest : Real;
-Begin
-  lowest:= 0;
-  for i:=1 to length(net[1]) Do Begin
-    if lowest>net[length(net),i].value then lowest := net[length(net),i].value;
-  end;
-  Result:=Lowest;
 end;
 
 Function istGrade(Number:longword):Boolean;
@@ -124,10 +83,9 @@ Begin
 end;
 
 Function Rectifier(x:Real):Real;
-Var y:Real;
 Begin
-  y:=0;
-  Result:=0;
+  if x>0 then result:=x else result:=0;
+  result:= max(x,0);
 end;
 
 //################### still need other routines #####################
@@ -244,7 +202,6 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   start;
-  WriteLn(inttostr(2*(0>2)));
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
