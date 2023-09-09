@@ -38,14 +38,24 @@ implementation
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
 Type
-  tWheightList = Array [1..1] of Real;
+  tBiases = Array[1..1,1..2] of real;
+  tLayerWheightList = Array [1..2,1..1] of Real;
+  tWholeWheightList = Array [1..1] of tLayerWheightList;
 
   tNeuron = Record
     Value   : Real;
     Activation_Function : Byte;
   end;
 
-  tNeuralNetwork = 0;
+  tNeuronLayer = Array [1..1] of tneuron;
+  tNeuronLayers = Array [1..1] of tNeuronLayer;
+
+
+  tNeuralNetwork = Record
+    Biases : tBiases;
+    Wheights : tWholeWheightList;
+    Neurons :tNeuronLayers;
+  end;
 
 Var
   Network : tNeuralNetwork;
@@ -69,7 +79,7 @@ Begin
   Result:=net;
 end;
 
-Function setInputNeurons(net:tNeuralNetwork; inputs:tLayerNeuonValues): tNeuralNetwork;
+Function setInputNeurons(net:tNeuralNetwork): tNeuralNetwork;
 Begin
   Result:=net;
 end;
@@ -83,19 +93,80 @@ end;
 Function Rectifier(x:Real):Real;
 Begin
   if x>0 then result:=x else result:=0;
-  result:= max(x,0);
+end;
+
+Function Threshhold (x:Real):real;
+Begin
+  if x<0 then result:=0 else result:=1;
+end;
+
+Function Sigmoid(x:Real):Real;
+Begin
+  Result:=1/(1+Exp(-x));
 end;
 
 //################### still need other routines #####################
+Function ApplyActivationFunction(x:Real;func:Byte):Real;
+Begin
+  if func=1 then result:=Threshhold(x)
+   else if func=2 then result:=Rectifier(x)
+    else if func=3 then result:=Sigmoid(x)
+     else Result:= x;
+end;
+Function ApplyActivationFunction_Neuron(neuron:tneuron):tneuron;
+Begin
+  neuron.Value:=ApplyActivationFunction(neuron.value,neuron.Activation_Function);
+  Result:= neuron;
+end;
 
 Function InitializeNetwork (net:tNeuralNetwork):tNeuralNetwork;
+Var
+  i,j,k : Byte;
 Begin
+  for i:=1 to length(net.Biases) Do
+   Begin
+     For j:=1 to Length(net.biases[1]) Do
+      net.biases[i,j]:= 0;
+   end;
+
+  for i:=1 to length(net.Wheights) Do
+   Begin
+     For j:=1 to Length(net.Wheights[1]) Do
+      Begin
+        For k:=1 to Length(net.Wheights[1,1]) Do
+          net.Wheights[i,j,k]:= 0;
+      end;
+   end;
+
+   for i:=1 to length(net.Neurons) Do
+   Begin
+     For j:=1 to Length(net.Neurons[1]) Do
+      Begin
+        net.Neurons[i,j].value:= 0;
+        net.neurons[1,j].Activation_Function:=0;
+        net.neurons[2,j].Activation_Function:=1;
+      end;
+   end;
+
   Result:=net;
 end;
 
-Function claculateNeuron(net:tNeuralNetwork; i,j:Byte):tNeuron;
+Function z (net:tNeuralNetwork; i,j:Byte):Real;
+Var
+  k : Byte;
 Begin
-  Result:= net[i,j];
+  for k:=1 to length(net.wheights[1,1]) DO
+
+end;
+
+Function claculateNeuron(net:tNeuralNetwork; i,j:Byte):tNeuron;
+Var
+  Neuron : tNeuron;
+Begin
+  Neuron:=net.Neurons[i,j];
+
+  Neuron.value:= z(net,i,j);
+  Result:= net.Neurons[i,j];
 end;
 
 Function calculateNetwork(net:tNeuralNetwork):tNeuralNetwork;
@@ -118,6 +189,9 @@ begin
   WriteLn('---------------------------------------------------------');
   Network:=InitializeNetwork(Network);
 
+  Writeln(inttostr(length(Network.biases)));
+  Writeln(inttostr(length(Network.biases[1])));
+  //Writeln(inttostr(length(Network.biases[1,1])));
   WriteLn('---------------------------------------------------------');
 end;
 

@@ -37,17 +37,25 @@ implementation
 //===================================================================
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
-Const
-
 Type
-  tWheightList = Array [1..1] of Real;
+  tBiases = Array[1..1,1..2] of real;
+  tLayerWheightList = Array [1..2,1..1] of Real;
+  tWholeWheightList = Array [1..1] of tLayerWheightList;
 
   tNeuron = Record
     Value   : Real;
     Activation_Function : Byte;
   end;
 
-  tNeuralNetwork = 0;
+  tNeuronLayer = Array [1..1] of tneuron;
+  tNeuronLayers = Array [1..1] of tNeuronLayer;
+
+
+  tNeuralNetwork = Record
+    Biases : tBiases;
+    Wheights : tWholeWheightList;
+    Neurons :tNeuronLayers;
+  end;
 
 Var
   Network : tNeuralNetwork;
@@ -71,7 +79,7 @@ Begin
   Result:=net;
 end;
 
-Function setInputNeurons(net:tNeuralNetwork; inputs:tLayerNeuonValues): tNeuralNetwork;
+Function setInputNeurons(net:tNeuralNetwork): tNeuralNetwork;
 Begin
   Result:=net;
 end;
@@ -85,100 +93,82 @@ end;
 Function Rectifier(x:Real):Real;
 Begin
   if x>0 then result:=x else result:=0;
-  result:= max(x,0);
+end;
+
+Function Threshhold (x:Real):real;
+Begin
+  if x<0 then result:=0 else result:=1;
+end;
+
+Function Sigmoid(x:Real):Real;
+Begin
+  Result:=1/(1+Exp(-x));
 end;
 
 //################### still need other routines #####################
+Function ApplyActivationFunction(x:Real;func:Byte):Real;
+Begin
+  if func=1 then result:=Threshhold(x)
+   else if func=2 then result:=Rectifier(x)
+    else if func=3 then result:=Sigmoid(x)
+     else Result:= x;
+end;
+Function ApplyActivationFunction_Neuron(neuron:tneuron):tneuron;
+Begin
+  neuron.Value:=ApplyActivationFunction(neuron.value,neuron.Activation_Function);
+  Result:= neuron;
+end;
 
 Function InitializeNetwork (net:tNeuralNetwork):tNeuralNetwork;
 Var
-  emptyNeuron:tNeuron;
-  i,j:Byte;
+  i,j,k : Byte;
 Begin
-  //ein leeres neuron erstellen um damit das netzwerk erfüllen
-  emptyNeuron.Value:=0;
-  for i:=1 to Length(emptyNeuron.Wheight) Do Begin
-    emptyNeuron.Wheight[i] := 0;
-  end;
+  for i:=1 to length(net.Biases) Do
+   Begin
+     For j:=1 to Length(net.biases[1]) Do
+      net.biases[i,j]:= 0;
+   end;
 
-  // das netzwerk mit leeren Neuronen füllen
-  For i:=1 to length(net) Do Begin
-    For j:=1 to length(net[1]) Do net[i,j]:= emptyNeuron;
-  end;
+  for i:=1 to length(net.Wheights) Do
+   Begin
+     For j:=1 to Length(net.Wheights[1]) Do
+      Begin
+        For k:=1 to Length(net.Wheights[1,1]) Do
+          net.Wheights[i,j,k]:= 0;
+      end;
+   end;
 
-  // das net nun bisl verändern
-  net := slightlyChanged(net);
+   for i:=1 to length(net.Neurons) Do
+   Begin
+     For j:=1 to Length(net.Neurons[1]) Do
+      Begin
+        net.Neurons[i,j].value:= 0;
+        net.neurons[1,j].Activation_Function:=0;
+        net.neurons[2,j].Activation_Function:=1;
+      end;
+   end;
 
   Result:=net;
 end;
 
 Function claculateNeuron(net:tNeuralNetwork; i,j:Byte):tNeuron;
 Var
-  k:Byte;
+  Neuron : tNeuron;
 Begin
-  net[i,j].value:=0;
-  for k:=1 to length(net) Do Begin
-    net[i,j].value:= net[i,j].value + net[i-1,k].value * net[i-1,k].Wheight[j];
-  end;
- // net[i,j].value := Runden(net[i,j].value, decimals);
+  Neuron:=net.Neurons[i,j];
 
-  Result:= net[i,j];
+  Neuron:= z(net,i,j)
+  Result:= net.Neurons[i,j];
 end;
 
 Function calculateNetwork(net:tNeuralNetwork):tNeuralNetwork;
-Var
-  i,j : Byte;
 Begin
-  For i:=2 to length(net) Do Begin
-    For j:=1 to length(net[1]) Do Begin
-      Net[i,j]:= claculateNeuron(net,i,j)
-      //For k:=1 to length(net[1,1].Wheight) Do
-    end;
-  end;
   Result:= net;
 end;
 
-Function HighestOutputValue(Net:tNeuralNetwork):Real;
-Var
-  i : Byte;
-  highest : Real;
-Begin
-  highest:= LowestOutputValue(Net);
-  for i:=1 to length(net[1]) Do Begin
-    if highest<net[length(net),i].value then highest := net[length(net),i].value;
-  end;
-  result:=highest;
-end;
-
-Function HighestOutputNeuron (Net:tNeuralNetwork):Byte;
-Var
-  i,s : Byte;
-  highest : Real;
-  bestactions : Array [1..maxneurons] of Byte;
-Begin
-  s:=0;
-  highest:= HighestOutputValue(net);
-  for i:=1 to length(net[1]) Do Begin
-    if highest=net[length(net),i].value then Begin
-      s:=s+1;
-      bestactions[s]:=i;
-    end;
-  end;
-  if s>1 then Result:= Length(net[1])+1
-  else Result:= bestactions[s];
-end;
-
 Procedure DisplayNet(net:tNeuralNetwork);
-Var
-  i,j,k : Byte;
 Begin
-  for i:=1 to length(net) Do Begin
-   For j:=1 to length(net[1]) Do begin
-    For k:=1 to length(net[1,1].Wheight) DO Begin
-     Writeln('layer '+Inttostr(i)+'; neuron '+Inttostr(j)+'; wheight '+Inttostr(k)+' Value '+Floattostr(net[i,j].Wheight[k]));
-    end;
-   end;
-  end;
+
 end;
 
 //===================================================================
@@ -191,6 +181,9 @@ begin
   WriteLn('---------------------------------------------------------');
   Network:=InitializeNetwork(Network);
 
+  Writeln(inttostr(length(Network.biases)));
+  Writeln(inttostr(length(Network.biases[1])));
+  //Writeln(inttostr(length(Network.biases[1,1])));
   WriteLn('---------------------------------------------------------');
 end;
 
