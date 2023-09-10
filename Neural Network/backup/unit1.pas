@@ -38,17 +38,20 @@ implementation
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
 Type
-  tBiases = Array[1..1,1..2] of real;
+  tBiases = Array[1..1,1..1] of real;
+  // tbiases[number of the origin layer, number of the targeted neuron]
+
   tLayerWheightList = Array [1..2,1..1] of Real;
   tWholeWheightList = Array [1..1] of tLayerWheightList;
+  // tWholeWheightList[number of the origin Layer, number origin Neuron. number of the targeted neuron]
 
   tNeuron = Record
     Value   : Real;
     Activation_Function : Byte;
   end;
 
-  tNeuronLayer = Array [1..1] of tneuron;
-  tNeuronLayers = Array [1..1] of tNeuronLayer;
+  tNeuronLayer = Array [1..2] of tneuron;
+  tNeuronLayers = Array [1..2] of tNeuronLayer;
 
 
   tNeuralNetwork = Record
@@ -113,6 +116,7 @@ Begin
     else if func=3 then result:=Sigmoid(x)
      else Result:= x;
 end;
+
 Function ApplyActivationFunction_Neuron(neuron:tneuron):tneuron;
 Begin
   neuron.Value:=ApplyActivationFunction(neuron.value,neuron.Activation_Function);
@@ -126,7 +130,7 @@ Begin
   for i:=1 to length(net.Biases) Do
    Begin
      For j:=1 to Length(net.biases[1]) Do
-      net.biases[i,j]:= 0;
+      net.biases[i,j]:= -0.5;            //changed for testing
    end;
 
   for i:=1 to length(net.Wheights) Do
@@ -134,7 +138,7 @@ Begin
      For j:=1 to Length(net.Wheights[1]) Do
       Begin
         For k:=1 to Length(net.Wheights[1,1]) Do
-          net.Wheights[i,j,k]:= 0;
+          net.Wheights[i,j,k]:= 0.5;     //changed for testing
       end;
    end;
 
@@ -143,31 +147,67 @@ Begin
      For j:=1 to Length(net.Neurons[1]) Do
       Begin
         net.Neurons[i,j].value:= 0;
+        net.neurons[i,j].Activation_Function:=1;
         net.neurons[1,j].Activation_Function:=0;
-        net.neurons[2,j].Activation_Function:=1;
       end;
    end;
 
   Result:=net;
 end;
 
-Function claculateNeuron(net:tNeuralNetwork; i,j:Byte):tNeuron;
+Function z (net:tNeuralNetwork; i,j:Byte):Real;
+Var
+  Neuron:tNeuron;
+  l : Byte;
+Begin
+
+  Neuron:=net.Neurons[i,j];
+
+  for l:=1 to length(net.wheights[1]) DO
+    Neuron.value:=Neuron.value + (net.wheights[i-1,l,j] * net.Neurons[i-1,l].value);
+  Writeln(Floattostr(Neuron.value));
+  Neuron.value:=Neuron.value+net.biases[i-1,j];
+
+  Writeln('------');
+  Writeln(Floattostr(Neuron.value));
+  Writeln('-------');
+
+  Result:=Neuron.Value;
+end;
+
+Function calculateNeuron(net:tNeuralNetwork; i,j:Byte):tNeuron;
 Var
   Neuron : tNeuron;
 Begin
   Neuron:=net.Neurons[i,j];
+  Neuron.value:=0;
 
-  Neuron:= z(net,i,j)
+  Neuron.value:= z(net,i,j);
+  
+  Neuron := ApplyActivationFunction_Neuron(Neuron);
+
   Result:= net.Neurons[i,j];
 end;
 
 Function calculateNetwork(net:tNeuralNetwork):tNeuralNetwork;
+Var
+  i,j:Byte;
 Begin
+  For i:=2 to length(net.neurons) do
+   for j:=1 to length(net.neurons[1]) do
+    net.Neurons[i,j]:= calculateNeuron(net,i,j);
+
   Result:= net;
 end;
 
 Procedure DisplayNet(net:tNeuralNetwork);
+Var
+  i,j:Byte;
 Begin
+  For i:=1 to length(net.neurons) do
+   for j:=1 to length(net.neurons[1]) do Begin
+     Writeln(Floattostr(Network.Neurons[i,j].value));
+   end;
 
 end;
 
@@ -181,8 +221,14 @@ begin
   WriteLn('---------------------------------------------------------');
   Network:=InitializeNetwork(Network);
 
-  Writeln(inttostr(length(Network.biases)));
-  Writeln(inttostr(length(Network.biases[1])));
+  Network.neurons[1,1].value:=1;
+  Network.neurons[1,2].value:=1;
+
+  Network:=calculateNetwork(Network);
+
+  DisplayNet(Network);
+
+  //Writeln(Floattostr(Network.Neurons[2,1].value));
   //Writeln(inttostr(length(Network.biases[1,1])));
   WriteLn('---------------------------------------------------------');
 end;
