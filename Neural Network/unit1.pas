@@ -100,7 +100,7 @@ end;
 
 Function Threshhold (x:Real):real;
 Begin
-  if x<0 then result:=0 else result:=1;
+  if (x<0) or (x=0) then result:=0 else result:=1;
 end;
 
 Function Sigmoid(x:Real):Real;
@@ -130,7 +130,7 @@ Begin
   for i:=1 to length(net.Biases) Do
    Begin
      For j:=1 to Length(net.biases[1]) Do
-      net.biases[i,j]:= -0.5;            //changed for testing
+      net.biases[i,j]:= 0;            //changed for testing
    end;
 
   for i:=1 to length(net.Wheights) Do
@@ -166,14 +166,17 @@ Begin
   Writeln(Floattostr(Neuron.value));
   Writeln('-----');
 
-  for l:=1 to length(net.wheights[1]) DO
+  for l:=1 to length(net.wheights[1]) DO Begin
     Neuron.value:=Neuron.value + (net.wheights[i-1,l,j] * net.Neurons[i-1,l].value);
+    Writeln(Floattostr(Neuron.Value));
+  end;
+  Writeln('------');
   Writeln(Floattostr(Neuron.value));
   Neuron.value:=Neuron.value+net.biases[i-1,j];
 
-  Writeln('------');
-  Writeln(Floattostr(Neuron.value));
   Writeln('-------');
+  Writeln(Floattostr(Neuron.value));
+  Writeln('---end---');
 
   Result:=Neuron.Value;
 end;
@@ -189,7 +192,7 @@ Begin
   
   Neuron := ApplyActivationFunction_Neuron(Neuron);
 
-  Result:= net.Neurons[i,j];
+  Result:= Neuron;
 end;
 
 Function calculateNetwork(net:tNeuralNetwork):tNeuralNetwork;
@@ -224,8 +227,8 @@ begin
   WriteLn('---------------------------------------------------------');
   Network:=InitializeNetwork(Network);
 
-  Network.neurons[1,1].value:=1;
-  Network.neurons[1,2].value:=1;
+  Network.neurons[1,1].value:=0;
+  Network.neurons[1,2].value:=0;
 
   Network:=calculateNetwork(Network);
 
