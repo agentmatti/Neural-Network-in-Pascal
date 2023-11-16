@@ -38,10 +38,10 @@ implementation
 //               eigene globale Deklarationen
 //-------------------------------------------------------------------
 Type
-  tBiases = Array[1..1,1..1] of real;
+  tBiases = Array[1..1,1..2] of real;
   // tbiases[number of the origin layer, number of the targeted neuron]
 
-  tLayerWheightList = Array [1..2,1..1] of Real;
+  tLayerWheightList = Array [1..2,1..2] of Real;
   tWholeWheightList = Array [1..1] of tLayerWheightList;
   // tWholeWheightList[number of the origin Layer, number origin Neuron. number of the targeted neuron]
 
@@ -89,8 +89,7 @@ end;
 
 Function istGrade(Number:longword):Boolean;
 Begin
-  if ((number Div 2)*2)= number then Result:=true
-  else Result:= false;
+  Result := (((number Div 2)*2)= number);
 end;
 
 Function Rectifier(x:Real):Real;
@@ -172,7 +171,7 @@ Begin
   end;
   Writeln('------');
   Writeln(Floattostr(Neuron.value));
-  Neuron.value:=Neuron.value+0; //net.biases[i-1,j];
+  Neuron.value:=Neuron.value+net.biases[i-1,j];
 
   Writeln('-------');
   Writeln(Floattostr(Neuron.value));
@@ -227,8 +226,8 @@ begin
   WriteLn('---------------------------------------------------------');
   Network:=InitializeNetwork(Network);
 
-  Network.neurons[1,1].value:=0;
-  Network.neurons[1,2].value:=0;
+  Network.neurons[1,1].value:=1;
+  Network.neurons[1,2].value:=1;
 
   Network:=calculateNetwork(Network);
 
